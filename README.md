@@ -1,21 +1,23 @@
 # LAMP Stack Setup Script
 
-This repository contains a Bash script designed to quickly set up a LAMP (Linux, Apache, MySQL/MariaDB, PHP) stack along with additional tools such as phpMyAdmin and Composer. The script automates package updates, installations, and initial configurations to help you get your development environment up and running with minimal effort.
+This repository contains a Bash script that automates the installation and configuration of a complete LAMP (Linux, Apache, MariaDB, PHP) stack. It also includes optional tools such as phpMyAdmin and Composer. Designed for Debian-based systems (like Ubuntu), this script ensures a fast, reliable setup for web development environments.
 
 ## Features
 
-- **Apache Installation:** Installs Apache2 and ensures the service is started and enabled.
-- **PHP Installation:** Installs PHP along with necessary extensions for typical web applications.
-- **MariaDB Installation:** Installs MariaDB (as a drop-in replacement for MySQL) and secures the installation.
-- **phpMyAdmin:** Installs phpMyAdmin and links it to your Apache server for easy database management.
-- **Composer:** Downloads and installs Composer, the dependency manager for PHP.
-- **Graceful Cancellation:** If the installation process is interrupted (e.g., via Ctrl+C), the script cancels the process and performs cleanup.
+* **Apache Installation:** Installs Apache2, starts the service, and enables it to run on boot.
+* **PHP Installation:** Installs PHP and common extensions required by popular frameworks and CMS platforms.
+* **MariaDB Installation:** Installs MariaDB (MySQL-compatible) and runs a secure installation process.
+* **phpMyAdmin Installation:** Automatically installs and configures phpMyAdmin with Apache. Post-install configuration advice is provided for MariaDB users who encounter access issues.
+* **Composer Installation:** Installs Composer globally, the PHP dependency manager.
+* **Graceful Cancellation:** Handles script interruption (e.g., Ctrl+C) gracefully, exiting cleanly with partial cleanup if necessary.
+* **Error Handling:** Script checks for errors at critical stages, aborting with informative messages if something goes wrong.
+* **Service Management:** Verifies and enables each installed service to start on system boot.
 
 ## Prerequisites
 
-- A Debian-based Linux distribution (such as Ubuntu).
-- Sudo privileges to install and manage packages.
-- An active internet connection for package downloads.
+* Debian-based Linux distribution (Ubuntu, etc.)
+* Sudo privileges
+* Active internet connection
 
 ## Installation and Usage
 
@@ -26,7 +28,7 @@ git clone https://github.com/giftbalogun/vpsLAMPsetup.git
 cd vpsLAMPsetup
 ```
 
-### 2. Make the Script Executable (if not already)
+### 2. Make the Script Executable
 
 ```bash
 chmod +x setup.sh
@@ -34,14 +36,47 @@ chmod +x setup.sh
 
 ### 3. Run the Script
 
-Execute the script with sudo to allow it to install packages and manage system services.
+Execute the script with superuser privileges:
+
 ```bash
 sudo ./setup.sh
 ```
-The script will update your package list, install and configure Apache, PHP, MariaDB, phpMyAdmin, and Composer. 
-Follow any on-screen prompts (e.g., during the MariaDB secure installation process).
+
+Follow on-screen prompts. During the MariaDB setup, you'll be prompted to secure your installation.
+
+> **Note:** On systems using MariaDB, phpMyAdmin may return an "Access denied for user 'root'@'localhost'" error. This happens when MariaDB uses `unix_socket` authentication. To fix this:
+>
+> 1. Login with sudo:
+>
+>    ```bash
+>    sudo mariadb
+>    ```
+> 2. Then run:
+>
+>    ```sql
+>    UPDATE mysql.user SET plugin = 'mysql_native_password' WHERE user = 'root';
+>    SET PASSWORD FOR 'root'@'localhost' = PASSWORD('your_password');
+>    FLUSH PRIVILEGES;
+>    ```
+> 3. Restart MariaDB:
+>
+>    ```bash
+>    sudo systemctl restart mariadb
+>    ```
+> 4. Use your password in phpMyAdmin.
 
 ## How It Works
-- Signal Handling: The script includes a trap for the SIGINT signal (Ctrl+C). If the user cancels the installation, the script will exit gracefully and clean up.
-- Error Handling: At each critical step, the script checks for errors. If an installation fails, the script will exit and print an error message.
-- Service Management: After installing each service, the script ensures the service is started and set to run on system boot.
+
+* **Signal Handling:** Uses trap to catch `SIGINT` (Ctrl+C) and exit cleanly.
+* **Error Handling:** Aborts on any failed step with helpful error messages.
+* **Service Checks:** Ensures Apache, MariaDB, and PHP are properly running and enabled.
+
+## License
+
+MIT License. See `LICENSE` file for more details.
+
+## Author
+
+Gift Balogun
+
+For feedback, contributions, or issues, please visit the [GitHub repository](https://github.com/giftbalogun/vpsLAMPsetup).
